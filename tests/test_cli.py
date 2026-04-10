@@ -1,7 +1,12 @@
 import time
 from pathlib import Path
 from unittest.mock import patch
-from duplicate_filechecker.cli import main
+
+from typer.testing import CliRunner
+
+from duplicate_filechecker.cli import app, check
+
+runner = CliRunner()
 
 
 def test_cli_logs_duration(tmp_path, monkeypatch):
@@ -23,13 +28,13 @@ def test_cli_logs_duration(tmp_path, monkeypatch):
 
         with patch('duplicate_filechecker.cli.Logger') as mock_logger_class:
             mock_logger = mock_logger_class.return_value
-            main(str(test_dir), merge=True)
+            check(str(test_dir), merge=True)
 
             # Check that log_duration was called with 5.5
             mock_logger.log_duration.assert_called_once_with(5.5)
 
 
-def test_maintenance_purge_missing_command_runs_service(tmp_path, monkeypatch):
+def test_maint_purge_missing_subcommand_runs_service(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     db_path = tmp_path / "maintenance.db"
@@ -40,8 +45,23 @@ def test_maintenance_purge_missing_command_runs_service(tmp_path, monkeypatch):
             "Summary", (), {"scanned": 3, "purged": 1, "failed": 0}
         )()
 
-        from duplicate_filechecker.cli import maintenance_purge_missing
+        result = runner.invoke(app, ["maint", "purge-missing", "--db-path", str(db_path)])
 
-        maintenance_purge_missing(str(db_path))
-
+        assert result.exit_code == 0
         mock_service.purge_missing_entries.assert_called_once()
+
+
+def test_check_subcommand_invokes_duplicate_check_flow(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+    test_dir = tmp_path / "target"
+    test_dir.mkdir()
+    (test_dir / "a.mp4").write_text("same")
+    (test_dir / "b.mp4").write_text("same")
+
+    with patch("duplicate_filechecker.cli.Logger") as mock_logger_class:
+        mock_logger = mock_logger_class.return_value
+        result = runner.invoke(app, ["check", str(test_dir)])
+
+    assert result.exit_code == 0
+    assert mock_logger.log_file.called

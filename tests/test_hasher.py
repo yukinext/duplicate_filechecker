@@ -12,9 +12,10 @@ def test_calculate_hash():
         test_file = f.name
     
     try:
-        hash_value = hasher.calculate_hash(test_file)
+        hash_value, skipped = hasher.calculate_hash(test_file)
         assert isinstance(hash_value, str)
         assert len(hash_value) > 0
+        assert skipped is False
     finally:
         os.unlink(test_file)
 
@@ -28,7 +29,9 @@ def test_hash_skip_if_cached(tmp_path):
     test_file.write_text("content")
     
     # First call should calculate
-    hash1 = hasher.calculate_hash(str(test_file))
+    hash1, skipped1 = hasher.calculate_hash(str(test_file))
     # Second call should return cached
-    hash2 = hasher.calculate_hash(str(test_file))
+    hash2, skipped2 = hasher.calculate_hash(str(test_file))
     assert hash1 == hash2
+    assert skipped1 is False
+    assert skipped2 is True

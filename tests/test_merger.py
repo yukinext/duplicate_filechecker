@@ -43,7 +43,7 @@ def test_merger_renames_conflicting_file(tmp_path, monkeypatch, capsys):
     trash_dir = source_dir.with_name(source_dir.name + ".dup_trash")
     existing_target_dir = trash_dir / "foo"
     existing_target_dir.mkdir(parents=True)
-    (existing_target_dir / "john.mp4").write_text("existing")
+    (existing_target_dir / "john_branch.mp4").write_text("existing")
 
     merger = Merger()
     logger = Logger("merger_conflict.log")
@@ -52,7 +52,7 @@ def test_merger_renames_conflicting_file(tmp_path, monkeypatch, capsys):
     moved = merger.merge(duplicates, str(trash_dir), str(source_dir), logger)
 
     assert moved == 1
-    assert (existing_target_dir / "john_1.mp4").exists()
+    assert (existing_target_dir / "john_branch_1.mp4").exists()
     assert not branch.exists()
     captured = capsys.readouterr()
     assert "stem" in captured.out

@@ -11,10 +11,12 @@ from .merger import Merger
 from .scanner import Scanner
 
 app = typer.Typer()
+maint_app = typer.Typer()
+app.add_typer(maint_app, name="maint")
 
 
-@app.command()
-def main(
+@app.command("check")
+def check(
     directory: str = typer.Argument(..., help="Directory to scan"),
     pattern: str = "*.mp4",
     trash_dir: str | None = None,
@@ -81,13 +83,24 @@ def main(
     logger.logger.info("処理が完了しました。")
 
 
-def maintenance_purge_missing(db_path: str = "duplicates.db"):
+@maint_app.command("purge-missing")
+def maint_purge_missing(db_path: str = "duplicates.db"):
     logger = Logger()
     db = Database(db_path)
     service = MaintenanceService(db=db, logger=logger, audit_writer=PurgeAuditWriter())
     summary = service.purge_missing_entries()
 
     logger.logger.info(f"メンテナンス完了: scanned={summary.scanned}, purged={summary.purged}, failed={summary.failed}")
+
+
+def main(
+    directory: str,
+    pattern: str = "*.mp4",
+    trash_dir: str | None = None,
+    merge: bool = False,
+):
+    # Backward compatible call path for direct function usage in existing tests/tools.
+    check(directory=directory, pattern=pattern, trash_dir=trash_dir, merge=merge)
 
 
 if __name__ == "__main__":

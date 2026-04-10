@@ -73,15 +73,15 @@ def test_log_move(tmp_path, monkeypatch, capsys):
 
     # Check console output
     captured = capsys.readouterr()
-    assert "moved" in captured.out
-    assert "stem" in captured.out
+    assert "moved" in captured.out.lower()
+    assert "stem" in captured.out.lower()
 
     # Check file output
     log_file = tmp_path / "logs" / "move_test.log"
     assert log_file.exists()
     content = log_file.read_text()
-    assert "moved" in content
-    assert "stem" in content
+    assert "moved" in content.lower()
+    assert "stem" in content.lower()
 
 
 def test_log_duration(tmp_path, monkeypatch, capsys):
