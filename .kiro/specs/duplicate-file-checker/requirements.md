@@ -97,8 +97,9 @@
 1. The duplicate-file-checker はloggingライブラリを用いてログファイルとコンソールに出力する。
 2. When ファイルが処理されたとき、duplicate-file-checker はファイルパスをログとコンソールに出力する。
 3. The duplicate-file-checker はログファイルを `logs` ディレクトリに出力する。ディレクトリが存在しない場合は作成する。
-4. The duplicate-file-checker はログファイルをデイリーでローテーションし、上限は7日分の保持とする。
-
+4. The duplicate-file-checker はログファイルをデイリーでローテーションし、上限は7日分の保持とする。5. When ファイルがスキップされた場合、duplicate-file-checker はスキップした旨をログとコンソールに出力する。
+6. When 枝ファイルが移動された場合、duplicate-file-checker は移動した枝ファイルのパスをログとコンソールに出力する。
+7. When 処理が完了したとき、duplicate-file-checker は処理時間をログとコンソールに出力する。
 ### Requirement 7: CLIインターフェース
 **Objective:** Typerを用いたコマンドラインインターフェースを提供する。
 

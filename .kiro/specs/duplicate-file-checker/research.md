@@ -38,6 +38,24 @@ Document notable investigation steps and their outcomes. Group entries by topic 
 - **Findings**: TyperはPython CLIライブラリ、デコレータベースで使いやすい
 - **Implications**: CLI実装に適する
 
+### ログ出力拡張の実現性
+- **Context**: ログ出力機能の拡張（スキップログ、移動ログ、処理時間ログ）
+- **Sources Consulted**: 既存のdesign.md、logger.pyの実装、Python loggingドキュメント
+- **Findings**: 既存のlogging設定を拡張可能。ログディレクトリ作成とローテーションは既に実装済み。新しいログメソッドを追加することで要件を満たせる。
+- **Implications**: 実装コストが低く、既存アーキテクチャに適合。
+
+### コンポーネント間連携
+- **Context**: HasherとMergerからLoggerを呼び出す統合方法
+- **Sources Consulted**: 既存のコンポーネントインターフェース、design.mdのDependencies
+- **Findings**: Hasherのcalculate_hashでスキップ判定時にLogger.log_skipを呼び出し可能。Mergerのmergeで移動時にLogger.log_moveを呼び出し可能。CLIで処理開始・終了時にtimeモジュールで計測し、Logger.log_durationを呼び出し。
+- **Implications**: インターフェース変更が最小限で済む。
+
+### 処理時間計測
+- **Context**: 処理時間の計測方法
+- **Sources Consulted**: Python timeモジュールドキュメント
+- **Findings**: time.time()を使用して開始・終了時間を記録し、差分を計算可能。
+- **Implications**: 標準ライブラリのみで実現可能。
+
 ## Architecture Pattern Evaluation
 List candidate patterns or approaches that were considered. Use the table format where helpful.
 

@@ -146,6 +146,9 @@ Map each requirement ID (e.g., `2.1`) to the design elements that realize it.
 | 6.1 | ログ | Logger | logging | ログフロー |
 | 6.3 | ログディレクトリ | Logger | ファイルシステム | ログディレクトリ |
 | 6.4 | ログローテーション | Logger | logging | ローテーション |
+| 6.5 | スキップログ | Logger | Hasher | ログフロー |
+| 6.6 | 移動ログ | Logger | Merger | ログフロー |
+| 6.7 | 処理時間ログ | Logger | CLI | ログフロー |
 | 7.1 | CLI | CLI | Typer | CLIフロー |
 
 ## Components and Interfaces
@@ -314,12 +317,17 @@ def main(directory: str, pattern: str = "*.mp4", trash_dir: str = None, merge: b
 | Field | Detail |
 |-------|--------|
 | Intent | ログ設定機能 |
-| Requirements | 6.1, 6.2 |
+| Requirements | 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7 |
 | Owner / Reviewers | (optional) |
 
 **Responsibilities & Constraints**
 - logging設定
 - ファイルとコンソール出力
+- ログディレクトリ作成
+- デイリーローテーション
+- スキップ時のログ出力
+- 移動時のログ出力
+- 処理時間のログ出力
 
 **Dependencies**
 - Inbound: All — ログ呼び出し (P0)
@@ -332,5 +340,11 @@ def main(directory: str, pattern: str = "*.mp4", trash_dir: str = None, merge: b
 ```python
 class Logger:
     def setup(self) -> None:
+        pass
+    def log_skip(self, file_path: str) -> None:
+        pass
+    def log_move(self, file_path: str) -> None:
+        pass
+    def log_duration(self, duration: float) -> None:
         pass
 ```
