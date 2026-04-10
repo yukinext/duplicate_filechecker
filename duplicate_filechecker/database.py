@@ -22,3 +22,9 @@ class Database:
             cursor = conn.execute("SELECT hash FROM files WHERE path = ?", (file_path,))
             row = cursor.fetchone()
             return row[0] if row else None
+
+    def get_stem_file(self, hash_value: str) -> str | None:
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.execute("SELECT path FROM files WHERE hash = ? ORDER BY path LIMIT 1", (hash_value,))
+            row = cursor.fetchone()
+            return row[0] if row else None
