@@ -279,12 +279,13 @@ class Merger:
 | Field | Detail |
 |-------|--------|
 | Intent | CLIインターフェース |
-| Requirements | 7.1, 7.2 |
+| Requirements | 4.1, 7.1, 7.2 |
 | Owner / Reviewers | (optional) |
 
 **Responsibilities & Constraints**
 - 引数解析
 - 処理実行
+- 統計レポート表示（探索ファイル総数、スキップ数、処理数、ユニークファイル総数）
 
 **Dependencies**
 - Inbound: User — コマンド (P0)
