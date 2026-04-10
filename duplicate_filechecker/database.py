@@ -28,3 +28,13 @@ class Database:
             cursor = conn.execute("SELECT path FROM files WHERE hash = ? ORDER BY path LIMIT 1", (hash_value,))
             row = cursor.fetchone()
             return row[0] if row else None
+
+    def list_entries(self) -> list[tuple[str, str]]:
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.execute("SELECT path, hash FROM files")
+            rows = cursor.fetchall()
+            return [(row[0], row[1]) for row in rows]
+
+    def delete_entry(self, file_path: str):
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("DELETE FROM files WHERE path = ?", (file_path,))

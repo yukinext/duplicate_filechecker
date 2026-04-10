@@ -6,6 +6,7 @@ import typer
 from .database import Database
 from .hasher import Hasher
 from .logger import Logger
+from .maintenance import MaintenanceService, PurgeAuditWriter
 from .merger import Merger
 from .scanner import Scanner
 
@@ -78,6 +79,17 @@ def main(
     logger.log_duration(duration)
 
     logger.logger.info("処理が完了しました。")
+
+
+def maintenance_purge_missing(db_path: str = "duplicates.db"):
+    logger = Logger()
+    db = Database(db_path)
+    service = MaintenanceService(db=db, logger=logger, audit_writer=PurgeAuditWriter())
+    summary = service.purge_missing_entries()
+
+    logger.logger.info(
+        f"メンテナンス完了: scanned={summary.scanned}, purged={summary.purged}, failed={summary.failed}"
+    )
 
 
 if __name__ == "__main__":
