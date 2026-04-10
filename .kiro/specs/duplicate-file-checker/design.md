@@ -203,6 +203,7 @@ class Scanner:
 **Responsibilities & Constraints**
 - ファイルハッシュ計算
 - DBキャッシュチェック
+- DBにハッシュ値が存在する場合は計算をスキップし、その事象をCLIへ通知
 
 **Dependencies**
 - Inbound: Scanner — ファイルパス (P0)
@@ -214,7 +215,7 @@ class Scanner:
 ##### Service Interface
 ```python
 class Hasher:
-    def calculate_hash(self, file_path: str) -> str:
+    def calculate_hash(self, file_path: str) -> tuple[str, bool]:
         pass
 ```
 
@@ -285,6 +286,7 @@ class Merger:
 **Responsibilities & Constraints**
 - 引数解析
 - 処理実行
+- DBキャッシュ適用時のハッシュスキップをスキップ数として集計
 - 統計レポート表示（探索ファイル総数、スキップ数、処理数、ユニークファイル総数）
 
 **Dependencies**

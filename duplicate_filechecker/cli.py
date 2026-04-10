@@ -41,8 +41,11 @@ def main(
     for file_path in files:
         logger.log_file(file_path)
         try:
-            hash_value = hasher.calculate_hash(file_path)
-            processed += 1
+            hash_value, skipped_by_cache = hasher.calculate_hash(file_path)
+            if skipped_by_cache:
+                skipped += 1
+            else:
+                processed += 1
 
             if hash_value in hash_map:
                 if hash_value not in duplicates:
