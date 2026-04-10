@@ -52,9 +52,10 @@
 **Objective:** ユーザーは指定したディレクトリからファイルパターンに一致するファイルを探索できる。
 
 #### Acceptance Criteria
-1. When ユーザーが探索ディレクトリとファイルパターンを指定したとき、duplicate-file-checker は指定ディレクトリ配下からパターンに該当するファイル群を探索する。
+1. When ユーザーが探索ディレクトリとファイルパターンを指定したとき、duplicate-file-checker は指定ディレクトリ配下からパターンに該当するファイル群を再起的に探索する。
 2. If 探索ディレクトリが存在しない場合、duplicate-file-checker はエラーメッセージを表示する。
 3. The duplicate-file-checker はデフォルトで `*.mp4` パターンを適用する。
+4. The duplicate-file-checker は指定ディレクトリのサブディレクトリを再起的に辿る。
 
 ### Requirement 2: ハッシュ計算と重複判定機能
 **Objective:** システムはファイルのハッシュを計算し、重複を判定できる。
@@ -92,6 +93,8 @@
 #### Acceptance Criteria
 1. The duplicate-file-checker はloggingライブラリを用いてログファイルとコンソールに出力する。
 2. When ファイルが処理されたとき、duplicate-file-checker はファイルパスをログとコンソールに出力する。
+3. The duplicate-file-checker はログファイルを `logs` ディレクトリに出力する。ディレクトリが存在しない場合は作成する。
+4. The duplicate-file-checker はログファイルをデイリーでローテーションし、上限は7日分の保持とする。
 
 ### Requirement 7: CLIインターフェース
 **Objective:** Typerを用いたコマンドラインインターフェースを提供する。
