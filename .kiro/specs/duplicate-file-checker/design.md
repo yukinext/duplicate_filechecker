@@ -79,6 +79,7 @@ State the responsibility boundary of this spec in concrete terms. Treat this as 
 | Backend | Python 3.14 | コアロジック | |
 | Data | SQLite | データ保存 | 標準ライブラリ |
 | Infrastructure | logging | ログ出力 | 標準ライブラリ |
+| Package Manager | uv | 依存関係管理 | |
 
 ## File Structure Plan
 
