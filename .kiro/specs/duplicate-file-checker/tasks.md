@@ -24,14 +24,14 @@ Use whichever pattern fits the work breakdown:
 > **Optional test coverage**: When a sub-task is deferrable test work tied to acceptance criteria, mark the checkbox as `- [ ]*` and explain the referenced requirements in the detail bullets.
 
 - [ ] 1. 環境とインフラのセットアップ
-- [ ] 1.1 プロジェクト構造の作成
+- [x] 1.1 プロジェクト構造の作成
   - duplicate_filechecker パッケージディレクトリを作成
   - __init__.py ファイルを追加
   - 必要なファイル構造を準備
   - ディレクトリ構造が設計通りになっていることを確認
   - _Requirements: 1.1, 3.1, 6.1, 7.1_
 
-- [ ] 1.2 依存関係の確認
+- [x] 1.2 依存関係の確認
   - Python 3.14 が利用可能であることを確認
   - Typer がインストールされていることを確認
   - 標準ライブラリ (sqlite3, hashlib, logging, pathlib, shutil) が利用可能であることを確認
@@ -39,7 +39,7 @@ Use whichever pattern fits the work breakdown:
   - _Requirements: 1.1, 2.1, 3.1, 6.1, 7.1_
 
 - [ ] 2. コアコンポーネントの実装
-- [ ] 2.1 (P) Scanner コンポーネントの実装
+- [x] 2.1 (P) Scanner コンポーネントの実装
   - 指定ディレクトリからファイルパターンマッチングでファイルを探索する機能を実装
   - ディレクトリが存在しない場合のエラーハンドリングを実装
   - デフォルトパターン *.mp4 を適用する機能を実装

@@ -1,6 +1,4 @@
-def main():
-    print("Hello from duplicate-filechecker!")
-
+from duplicate_filechecker.cli import app
 
 if __name__ == "__main__":
-    main()
+    app()
