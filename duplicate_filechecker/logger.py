@@ -1,5 +1,6 @@
 import logging
 import sys
+from pathlib import Path
 
 
 class Logger:
@@ -7,12 +8,19 @@ class Logger:
         self.logger = logging.getLogger("duplicate_checker")
         self.logger.setLevel(logging.INFO)
 
+        # Create logs directory if it doesn't exist
+        logs_dir = Path("logs")
+        logs_dir.mkdir(exist_ok=True)
+
+        # Use logs directory for log file
+        log_path = logs_dir / log_file
+
         # Remove existing handlers
         for handler in self.logger.handlers[:]:
             self.logger.removeHandler(handler)
 
         # File handler
-        file_handler = logging.FileHandler(log_file)
+        file_handler = logging.FileHandler(log_path)
         file_handler.setLevel(logging.INFO)
 
         # Console handler
