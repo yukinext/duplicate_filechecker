@@ -3,6 +3,10 @@
 ## Project Description (Input)
 メンテナンス用のサブコマンドを追加する。
 
+CLIの実装はTyperで統一し、コマンド名は以下とする。
+- `check`: 既存のファイル重複チェック機能
+- `maint`: メンテナンス機能
+
 1. DBに格納されているパスを確認する。
 2. パスのファイルが存在しない場合はそのエントリーを削除する。
 3. 削除したエントリーは、`logs/purged_entry.csv` に出力する。
@@ -41,3 +45,11 @@
 #### Acceptance Criteria
 4.1 When エントリー処理中に例外が発生した場合、duplicate-file-checker は対象パスと例外内容をログに出力する。
 4.2 The duplicate-file-checker は例外が発生したエントリー以外の処理を継続する。
+
+### Requirement 5: Typerサブコマンド構成
+**Objective:** 既存機能とメンテナンス機能をTyperサブコマンドとして明確に分離する。
+
+#### Acceptance Criteria
+5.1 The duplicate-file-checker はファイル重複チェック機能を `check` サブコマンドとして提供する。
+5.2 The duplicate-file-checker はメンテナンス機能を `maint` サブコマンドとして提供する。
+5.3 The duplicate-file-checker は `main.py` で独自ディスパッチを行わず、Typerのサブコマンド機構でルーティングする。

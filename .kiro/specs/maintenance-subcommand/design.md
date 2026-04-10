@@ -1,181 +1,203 @@
 # Design Document
 
 ## Overview
-**Purpose**: 本機能は、DBキャッシュの保守を安全に実行するメンテナンス用サブコマンドを追加する。具体的には、DBエントリーのパス存在確認、不存在エントリー削除、削除監査ログの出力を提供する。
-**Users**: 重複チェックを継続運用する開発者/運用者が、古いDBエントリーを定期的にクリーンアップする用途で利用する。
-**Impact**: 既存の重複判定精度と実行速度に影響する古いキャッシュを抑制し、監査可能な削除履歴を残せるようにする。
+**Purpose**: 本機能はCLIルーティングをTyperサブコマンドへ統一し、既存の重複チェック機能を `check`、メンテナンス機能を `maint` として提供する。あわせて、`maint` 配下でDB整合性保守（不存在パス削除と監査出力）を継続提供する。
+**Users**: 日常的に重複チェックを行う利用者と、DBキャッシュを保守する運用者。
+**Impact**: コマンド体系の明確化により誤操作を減らし、CLI拡張時の保守性を向上させる。
 
 ### Goals
-- DB全エントリーを対象に実在パスを検証する。
-- 不存在パスのエントリーのみを削除する。
-- 削除履歴を `logs/purged_entry.csv` にタブ区切りで追記する。
-- 既存のメイン処理コマンドと責務を分離する。
+- 重複チェックをTyperサブコマンド `check` として提供する。
+- メンテナンス機能をTyperサブコマンド `maint` として提供する。
+- `main.py` の手動ルーティングを廃止し、Typerへ一元化する。
+- 既存の保守要件（削除・監査出力・例外継続）を維持する。
 
 ### Non-Goals
-- DBスキーマ変更（テーブル追加・列追加）。
-- 削除対象の自動復元機能。
-- 監査ファイルのローテーションや圧縮。
+- 重複判定ロジックそのものの変更。
+- DBスキーマ変更。
+- 監査出力フォーマット（タブ区切り3列）の変更。
 
 ## Boundary Commitments
 
 ### This Spec Owns
-- メンテナンス用サブコマンドのCLI境界。
-- DBエントリー走査、ファイル存在判定、削除実行の制御。
-- 削除エントリー監査ログ（TSV形式）出力契約。
-- エントリー単位の例外処理と継続実行。
+- Typer CLIのサブコマンド境界（`check` / `maint`）の定義。
+- `maint` から保守サービスを呼び出すルーティング契約。
+- 既存保守機能の公開インターフェース維持（DB走査/削除/監査/継続）。
 
 ### Out of Boundary
-- 既存重複検出フロー（`main` コマンド）のアルゴリズム変更。
-- DBファイル配置ポリシーの再設計。
-- 監査ログの外部送信（SIEM連携など）。
+- ハッシュ計算や重複判定アルゴリズムの最適化。
+- ログ基盤（ローテーション設定）の再設計。
+- 監査ログの外部連携。
 
 ### Allowed Dependencies
-- Python標準ライブラリ: `pathlib`, `datetime`, `csv`, `sqlite3`。
-- 既存Typer CLI基盤。
-- 既存Logger（ファイル/コンソール出力）。
+- Typer（既存依存）。
+- Python標準ライブラリ（`sqlite3`, `pathlib`, `datetime`, `csv`, `logging`）。
+- 既存コンポーネント（Database, MaintenanceService, Logger, Scanner, Hasher, Merger）。
 
 ### Revalidation Triggers
-- `files` テーブルのカラム構成変更。
-- CLIコマンド体系変更（サブコマンド構成変更）。
-- 監査ログ出力フォーマット変更（区切り文字・列順・時刻形式）。
+- Typer CLI構造の変更（新サブコマンド追加、既存名称変更）。
+- `main.py` エントリポイント責務変更。
+- 保守サービス入出力契約（summary/audit列）の変更。
 
 ## Architecture
 
 ### Existing Architecture Analysis
-- 現行は `cli.py` の `main` コマンドを中心に、`Scanner` / `Hasher` / `Database` / `Merger` / `Logger` を組み合わせる構成。
-- `Database` は単一責務で `save/get_hash/get_stem_file` を提供しており、保守系API（全件取得・削除）は未提供。
-- `Logger` は `logs` ディレクトリ作成責務を既に持つ。
+- 現行は重複チェック処理が `main` コマンド中心で、メンテナンス処理はTyper外導線が混在している。
+- 保守機能のサービス分離（MaintenanceService/PurgeAuditWriter）は既に存在し、CLI層のみ再配線で統一可能。
 
 ### Architecture Pattern & Boundary Map
 **Architecture Integration**:
-- Selected pattern: 既存モジュール分離を維持したCLIオーケストレーション + サービス分離。
-- Domain/feature boundaries: CLI層（引数/実行）、保守サービス層（判定/削除）、データ層（DBアクセス）、監査出力層（TSV追記）。
-- Existing patterns preserved: DBアクセスを `Database` 経由に限定する方針。
-- New components rationale: 保守処理を `main` から分離し、テストと運用を独立させるため。
-- Steering compliance: ステアリング未配置のため既存コードの責務分離パターンへ整合。
+- Selected pattern: Typer中心の階層サブコマンド + サービス分離。
+- Domain/feature boundaries: CLI層はルーティング専任、アプリ層はユースケース実行、データ層はDB操作、インフラ層は監査出力。
+- Existing patterns preserved: 処理本体をサービス/コンポーネントへ寄せる責務分離。
+- New components rationale: `check`/`maint` の明示化で運用と拡張を安定化。
+- Steering compliance: ステアリング未配置のため、既存責務分離方針への整合で対応。
 
 ```mermaid
 graph TB
-  User --> CLI
-  CLI --> MaintenanceCommand
-  MaintenanceCommand --> MaintenanceService
+  User --> App
+  App --> CheckCommand
+  App --> MaintCommand
+  CheckCommand --> CheckPipeline
+  CheckPipeline --> Scanner
+  CheckPipeline --> Hasher
+  CheckPipeline --> Database
+  CheckPipeline --> Merger
+  CheckPipeline --> Logger
+  MaintCommand --> MaintenanceService
   MaintenanceService --> Database
-  MaintenanceService --> FileSystem
   MaintenanceService --> PurgeAuditWriter
   MaintenanceService --> Logger
-  PurgeAuditWriter --> PurgedEntryCsv
 ```
 
-### Technology Stack
+### Technology Stack & Alignment
 
 | Layer | Choice / Version | Role in Feature | Notes |
 |-------|------------------|-----------------|-------|
-| CLI | Typer (existing) | サブコマンド公開 | 既存コマンドと分離 |
-| Backend | Python 3.14 | 保守ロジック実行 | 型ヒント必須 |
-| Data | SQLite (`sqlite3`) | エントリー取得/削除 | 既存 `files` テーブル利用 |
-| Infrastructure | `logging`, `pathlib`, `datetime`, `csv` | 可観測性と監査出力 | 追加依存なし |
+| CLI | Typer | `check` / `maint` サブコマンド定義 | ルーティング一元化 |
+| Backend | Python 3.14 | ユースケース実行 | 型ヒント維持 |
+| Data | SQLite (`sqlite3`) | エントリー取得/削除/参照 | 既存 `files` テーブル利用 |
+| Infrastructure | `logging`, `pathlib`, `datetime`, `csv` | 可観測性・監査出力 | 既存方式維持 |
 
 ## File Structure Plan
 
 ### Directory Structure
 ```
 duplicate_filechecker/
-├── cli.py                 # maintenance サブコマンドの追加
-├── database.py            # list_entries/delete_entry の追加
-├── maintenance.py         # 保守ユースケースの新規サービス
-└── logger.py              # 例外/要約ログ呼び出しに利用
+├── cli.py            # Typerのcheck/maintサブコマンド定義
+├── maintenance.py    # maint用ユースケース
+├── database.py       # list/deleteなど保守用DB API
+└── logger.py         # ログ出力
+main.py               # app起動のみ
 ```
 
 ### Modified Files
-- `duplicate_filechecker/cli.py` — `maintenance` 系サブコマンドを追加し、既存 `main` との境界を分離。
-- `duplicate_filechecker/database.py` — 全件取得と削除の公開インターフェースを追加。
-- `duplicate_filechecker/logger.py` — 既存ロガーを流用（新規メソッド追加は任意、必須ではない）。
-- `duplicate_filechecker/maintenance.py` — 走査・削除・監査出力を実装する新規コンポーネント。
+- `duplicate_filechecker/cli.py` — `check` と `maint` サブコマンド定義、旧単一導線の整理。
+- `main.py` — 手動ディスパッチ廃止、Typer `app()` 呼び出しへ統一。
+- `duplicate_filechecker/maintenance.py` — `maint` ルーティング契約に合わせた公開境界確認。
+- `duplicate_filechecker/tests/*` — サブコマンド命名変更と回帰検証の更新。
 
 ## System Flows
 
 ```mermaid
 sequenceDiagram
   participant U as User
-  participant C as CLI
-  participant S as MaintenanceService
+  participant C as TyperCLI
+  participant P as CheckPipeline
+  participant M as MaintenanceService
   participant D as Database
-  participant F as FileSystem
   participant A as PurgeAuditWriter
-  participant L as Logger
 
-  U->>C: maintenance purge-missing
-  C->>S: execute()
-  S->>D: list_entries()
-  D-->>S: (path, hash) stream
-  loop each entry
-    S->>F: exists(path)
-    alt missing
-      S->>D: delete_entry(path)
-      S->>A: append(path, hash, utc_iso)
-    else exists
-      S-->>S: keep
-    end
+  alt check 実行
+    U->>C: check <directory>
+    C->>P: run duplicate check
+    P->>D: read/write hash cache
+    P-->>C: summary
+  else maint 実行
+    U->>C: maint purge-missing
+    C->>M: purge_missing_entries
+    M->>D: list_entries
+    M->>D: delete_entry missing path
+    M->>A: append audit row
+    M-->>C: summary
   end
-  S-->>C: summary
-  C->>L: info(summary)
 ```
 
 主要判断:
-- 例外はエントリー単位で捕捉し、ログ記録後に次エントリーへ継続する。
-- 監査行は削除成功後のみ追記し、DB状態との整合を保つ。
+- `main.py` はTyper呼び出しのみとし、ルーティング責務を重複させない。
+- `maint` の処理本体はサービス層へ保持し、CLIは入出力境界に限定する。
 
 ## Requirements Traceability
 
 | Requirement | Summary | Components | Interfaces | Flows |
 |-------------|---------|------------|------------|-------|
-| 1.1 | DB全エントリー取得 | Database, MaintenanceService | `list_entries()` | purge flow |
-| 1.2 | 独立サブコマンド提供 | CLI | `maintenance purge-missing` | purge flow |
-| 2.1 | 不存在エントリー削除 | MaintenanceService, Database | `delete_entry(path)` | purge flow |
-| 2.2 | 存在エントリー維持 | MaintenanceService | `Path.exists()` 判定 | purge flow |
-| 3.1 | 削除監査をCSV追記 | PurgeAuditWriter | `append(...)` | purge flow |
-| 3.2 | タブ区切り3列形式 | PurgeAuditWriter | TSV row contract | purge flow |
-| 3.3 | logs作成 | PurgeAuditWriter | output path contract | purge flow |
-| 4.1 | 例外ログ出力 | MaintenanceService, Logger | exception logging contract | purge flow |
-| 4.2 | 継続実行 | MaintenanceService | per-entry try/except | purge flow |
+| 1.1 | DB全エントリー取得 | MaintenanceService, Database | `list_entries()` | maint flow |
+| 1.2 | 独立サブコマンド提供 | Typer CLI | `maint` | maint flow |
+| 2.1 | 不存在エントリー削除 | MaintenanceService, Database | `delete_entry(path)` | maint flow |
+| 2.2 | 存在エントリー維持 | MaintenanceService | `Path.exists()` 判定 | maint flow |
+| 3.1 | 削除監査追記 | PurgeAuditWriter | `append(path, hash, utc)` | maint flow |
+| 3.2 | タブ区切り3列 | PurgeAuditWriter | TSV row contract | maint flow |
+| 3.3 | logs作成 | PurgeAuditWriter | output path contract | maint flow |
+| 4.1 | 例外ログ出力 | MaintenanceService, Logger | exception logging | maint flow |
+| 4.2 | 例外時継続 | MaintenanceService | per-entry try/except | maint flow |
+| 5.1 | 重複チェックはcheck | Typer CLI, CheckPipeline | `check` | check flow |
+| 5.2 | メンテはmaint | Typer CLI, MaintenanceService | `maint` | maint flow |
+| 5.3 | 手動分岐禁止 | main entrypoint | `app()` only | check/maint flow |
 
-## Components and Interfaces
+## Components & Interface Contracts
 
-| Component | Domain/Layer | Intent | Req Coverage | Key Dependencies (P0/P1) | Contracts |
-|-----------|--------------|--------|--------------|--------------------------|-----------|
-| MaintenanceCommand | CLI | 保守サブコマンド入口 | 1.2 | MaintenanceService(P0), Logger(P1) | Service |
-| MaintenanceService | Application | 走査/判定/削除/継続制御 | 1.1, 2.1, 2.2, 4.1, 4.2 | Database(P0), PurgeAuditWriter(P0), Logger(P1) | Service |
-| DatabaseExtension | Data | エントリー列挙/削除 | 1.1, 2.1 | sqlite3(P0) | Service |
-| PurgeAuditWriter | Infrastructure | 監査TSV追記 | 3.1, 3.2, 3.3 | pathlib(P0), datetime(P0), csv(P1) | Batch |
+| Component | Domain/Layer | Intent | Req Coverage | Key Dependencies | Contracts |
+|-----------|--------------|--------|--------------|------------------|-----------|
+| CheckCommand | CLI | 重複チェック機能の公開入口 | 5.1 | CheckPipeline(P0), Logger(P1) | Service |
+| MaintCommand | CLI | メンテ機能の公開入口 | 1.2, 5.2 | MaintenanceService(P0), Logger(P1) | Service |
+| CheckPipeline | Application | 既存重複チェック処理を実行 | 5.1 | Scanner(P0), Hasher(P0), Database(P0), Merger(P1) | Service |
+| MaintenanceService | Application | 不存在エントリー削除と監査出力 | 1.1, 2.1, 2.2, 4.1, 4.2, 5.2 | Database(P0), PurgeAuditWriter(P0), Logger(P1) | Service |
+| PurgeAuditWriter | Infrastructure | 監査行をTSVで追記 | 3.1, 3.2, 3.3 | pathlib(P0), datetime(P0), csv(P1) | Batch |
+| Entrypoint | Runtime | Typer起動のみを担当 | 5.3 | Typer(P0) | State |
 
 ### CLI Layer
 
-#### MaintenanceCommand
+#### CheckCommand
 
 | Field | Detail |
 |-------|--------|
-| Intent | メンテナンス処理起動と終了サマリー表示 |
-| Requirements | 1.2 |
+| Intent | 重複チェック処理を `check` 名で公開 |
+| Requirements | 5.1 |
 
 **Responsibilities & Constraints**
-- `main` コマンドと独立したコマンド名空間を提供する。
-- 入出力は保守処理結果サマリーに限定する。
-
-**Dependencies**
-- Outbound: `MaintenanceService` — 実処理呼び出し (P0)
-- Outbound: `Logger` — サマリー/異常ログ出力 (P1)
+- `check` サブコマンドとして既存処理を公開する。
+- パラメータ互換性を維持し、処理本体ロジックは変更しない。
 
 **Contracts**: Service [x] / API [ ] / Event [ ] / Batch [ ] / State [ ]
 
 ##### Service Interface
 ```python
-class MaintenanceCommandPort:
-    def purge_missing(self) -> "PurgeSummary":
-        ...
+def check(
+    directory: str,
+    pattern: str = "*.mp4",
+    trash_dir: str | None = None,
+    merge: bool = False,
+) -> None:
+    ...
 ```
-- Preconditions: DBへアクセス可能であること。
-- Postconditions: 実行サマリーを返すこと。
-- Invariants: 既存 `main` の動作契約を変更しないこと。
+
+#### MaintCommand
+
+| Field | Detail |
+|-------|--------|
+| Intent | 保守処理を `maint` 名で公開 |
+| Requirements | 1.2, 5.2 |
+
+**Responsibilities & Constraints**
+- `maint` 配下に保守操作を定義する。
+- 処理結果サマリーをログ出力する。
+
+**Contracts**: Service [x] / API [ ] / Event [ ] / Batch [ ] / State [ ]
+
+##### Service Interface
+```python
+def maint_purge_missing(db_path: str = "duplicates.db") -> None:
+    ...
+```
 
 ### Application Layer
 
@@ -183,29 +205,19 @@ class MaintenanceCommandPort:
 
 | Field | Detail |
 |-------|--------|
-| Intent | DBエントリーの検証・削除・監査出力を統括 |
-| Requirements | 1.1, 2.1, 2.2, 4.1, 4.2 |
-
-**Responsibilities & Constraints**
-- 全エントリーを逐次処理し、`Path.exists()` で実在判定する。
-- 不存在時にのみ削除を実行し、成功時のみ監査ログへ追記する。
-- エントリー単位例外で処理継続する。
+| Intent | DB走査、削除、監査、例外継続を統括 |
+| Requirements | 1.1, 2.1, 2.2, 4.1, 4.2, 5.2 |
 
 **Dependencies**
-- Outbound: `Database` — 取得/削除 (P0)
-- Outbound: `PurgeAuditWriter` — 監査行追加 (P0)
-- Outbound: `Logger` — 例外記録 (P1)
+- Outbound: Database — list/delete (P0)
+- Outbound: PurgeAuditWriter — append audit row (P0)
+- Outbound: Logger — exception/info logging (P1)
 
 **Contracts**: Service [x] / API [ ] / Event [ ] / Batch [ ] / State [ ]
 
 ##### Service Interface
 ```python
 from dataclasses import dataclass
-
-@dataclass(frozen=True)
-class PurgeEntry:
-    path: str
-    hash_value: str
 
 @dataclass(frozen=True)
 class PurgeSummary:
@@ -217,80 +229,39 @@ class MaintenanceService:
     def purge_missing_entries(self) -> PurgeSummary:
         ...
 ```
-- Preconditions: `Database.list_entries()` が `(path, hash)` を返せること。
-- Postconditions: 削除件数と失敗件数が集計されること。
-- Invariants: 存在するパスは削除しない。
 
-### Data Layer
+### Runtime Layer
 
-#### DatabaseExtension
+#### Entrypoint
 
 | Field | Detail |
 |-------|--------|
-| Intent | 保守処理に必要な列挙/削除インターフェースを提供 |
-| Requirements | 1.1, 2.1 |
+| Intent | Typerアプリ起動に責務を限定 |
+| Requirements | 5.3 |
 
-**Dependencies**
-- External: `sqlite3` — SQL実行 (P0)
-
-**Contracts**: Service [x] / API [ ] / Event [ ] / Batch [ ] / State [ ]
-
-##### Service Interface
-```python
-class Database:
-    def list_entries(self) -> list[tuple[str, str]]:
-        ...
-
-    def delete_entry(self, file_path: str) -> None:
-        ...
-```
-- Preconditions: `files(path, hash)` テーブルが存在すること。
-- Postconditions: `delete_entry` 実行後、対象パス行が存在しないこと。
-- Invariants: `delete_entry` は単一パスのみ削除する。
-
-### Infrastructure Layer
-
-#### PurgeAuditWriter
-
-| Field | Detail |
-|-------|--------|
-| Intent | 削除監査行を `logs/purged_entry.csv` に追記 |
-| Requirements | 3.1, 3.2, 3.3 |
-
-**Dependencies**
-- External: `pathlib` — 出力ディレクトリ準備 (P0)
-- External: `datetime` — UTC時刻生成 (P0)
-- External: `csv` — 区切り指定で出力 (P1)
-
-**Contracts**: Service [ ] / API [ ] / Event [ ] / Batch [x] / State [ ]
-
-##### Batch / Job Contract
-- Trigger: `MaintenanceService` が削除成功時に呼び出す。
-- Input / validation: `path` 非空、`hash_value` 非空。
-- Output / destination: `logs/purged_entry.csv` へタブ区切り1行追記。
-- Idempotency & recovery: 同一削除の再実行時は追加行が増えるため、上位で重複実行を管理する。
+**Responsibilities & Constraints**
+- `main.py` は `app()` 呼び出しのみを持つ。
+- 引数判定や手動分岐ロジックを持たない。
 
 ## Data Models
 
 ### Domain Model
-- `PurgeEntry(path, hash_value)` は検証対象。
-- `PurgeSummary(scanned, purged, failed)` は実行結果。
-- 監査行は `(path, hash_value, processed_at_utc)` の3要素で構成。
+- PurgeSummary: `scanned`, `purged`, `failed` を保持。
+- PurgeAuditRow: `file_path`, `hash_value`, `processed_at_utc`。
 
 ### Logical Data Model
-- 既存 `files` テーブルを再利用。
-- 参照: `SELECT path, hash FROM files`。
-- 削除: `DELETE FROM files WHERE path = ?`。
+- 既存 `files(path, hash)` を再利用。
+- 参照: `SELECT path, hash FROM files`
+- 削除: `DELETE FROM files WHERE path = ?`
 
 ### Physical Data Model
-- スキーマ追加なし。
-- 既存主キー `path` により削除対象は一意。
-- 監査ファイルは行追記型で、1行1削除イベント。
+- DBスキーマ変更なし。
+- 監査ファイルは `logs/purged_entry.csv` にタブ区切り追記。
 
 ## Risks & Mitigations
-- リスク: 誤削除の検知遅延。
-  - 対策: 監査行にUTCタイムスタンプを必須化。
-- リスク: 大量削除時のI/O増加。
-  - 対策: 1行追記のストリーム書き込みでメモリ固定。
-- リスク: コマンド誤実行。
-  - 対策: サブコマンド名を `maintenance purge-missing` と明示し主機能から分離。
+- リスク: 既存利用者が旧コマンド呼び出しを継続する。
+  - 対策: `--help` とREADMEで `check` / `maint` を明示し、必要に応じ移行案内を追加。
+- リスク: ルーティング変更で回帰が発生する。
+  - 対策: エントリポイント・CLI統合テストで両導線を固定化。
+- リスク: main.pyに再び手動分岐が混入する。
+  - 対策: エントリポイントテストで「app()のみ」を検証する。
