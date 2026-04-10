@@ -55,17 +55,17 @@ def main(
     # Report
     unique_files = len(hash_map) + sum(len(files) - 1 for files in duplicates.values())
     
-    print(f"探索したファイルの総数: {total_files}")
-    print(f"スキップしたファイルの総数: {skipped}")
-    print(f"今回処理したファイルの総数: {processed}")
-    print(f"ユニークなファイルの総数: {unique_files}")
+    logger.logger.info(f"探索したファイルの総数: {total_files}")
+    logger.logger.info(f"スキップしたファイルの総数: {skipped}")
+    logger.logger.info(f"今回処理したファイルの総数: {processed}")
+    logger.logger.info(f"ユニークなファイルの総数: {unique_files}")
     
     moved = 0
     if merge:
         moved = merger.merge(duplicates, trash_dir)
-        print(f"今回移動したファイルの総数: {moved}")
+        logger.logger.info(f"今回移動したファイルの総数: {moved}")
     
-    print("処理が完了しました。")
+    logger.logger.info("処理が完了しました。")
 
 if __name__ == "__main__":
     app()

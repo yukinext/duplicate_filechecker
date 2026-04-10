@@ -1,8 +1,0 @@
-{
-  "[python]": {
-    "editor.formatOnSave": true,
-    "editor.formatOnPaste": false,
-    "editor.formatOnType": false,
-    "editor.formatOnSaveMode": "file"
-  }
-}
