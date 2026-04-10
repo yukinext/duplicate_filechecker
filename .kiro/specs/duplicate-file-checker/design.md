@@ -149,6 +149,7 @@ Map each requirement ID (e.g., `2.1`) to the design elements that realize it.
 | 6.5 | スキップログ | Logger | Hasher | ログフロー |
 | 6.6 | 移動ログ | Logger | Merger | ログフロー |
 | 6.7 | 処理時間ログ | Logger | CLI | ログフロー |
+| 6.8 | スキップログに幹ファイル | Logger | Hasher | ログフロー |
 | 7.1 | CLI | CLI | Typer | CLIフロー |
 
 ## Components and Interfaces
@@ -317,7 +318,7 @@ def main(directory: str, pattern: str = "*.mp4", trash_dir: str = None, merge: b
 | Field | Detail |
 |-------|--------|
 | Intent | ログ設定機能 |
-| Requirements | 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7 |
+| Requirements | 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8 |
 | Owner / Reviewers | (optional) |
 
 **Responsibilities & Constraints**
@@ -341,9 +342,11 @@ def main(directory: str, pattern: str = "*.mp4", trash_dir: str = None, merge: b
 class Logger:
     def setup(self) -> None:
         pass
-    def log_skip(self, file_path: str) -> None:
+    def log_file(self, file_path: str) -> None:
         pass
-    def log_move(self, file_path: str) -> None:
+    def log_skip(self, skipped_file: str, stem_file: str) -> None:
+        pass
+    def log_move(self, source_path: str, target_path: str) -> None:
         pass
     def log_duration(self, duration: float) -> None:
         pass
