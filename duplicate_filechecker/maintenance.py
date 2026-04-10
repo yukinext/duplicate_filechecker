@@ -1,6 +1,6 @@
 import csv
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -17,7 +17,7 @@ class PurgeAuditWriter:
 
     def append(self, file_path: str, hash_value: str):
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
-        processed_at = datetime.now(timezone.utc).isoformat()
+        processed_at = datetime.now(UTC).isoformat()
 
         with self.output_path.open("a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f, delimiter="\t", lineterminator="\n")

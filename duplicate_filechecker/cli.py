@@ -87,9 +87,7 @@ def maintenance_purge_missing(db_path: str = "duplicates.db"):
     service = MaintenanceService(db=db, logger=logger, audit_writer=PurgeAuditWriter())
     summary = service.purge_missing_entries()
 
-    logger.logger.info(
-        f"メンテナンス完了: scanned={summary.scanned}, purged={summary.purged}, failed={summary.failed}"
-    )
+    logger.logger.info(f"メンテナンス完了: scanned={summary.scanned}, purged={summary.purged}, failed={summary.failed}")
 
 
 if __name__ == "__main__":
