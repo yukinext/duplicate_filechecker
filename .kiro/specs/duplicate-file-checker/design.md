@@ -293,6 +293,7 @@ class Merger:
 ```python
 @app.command()
 def main(directory: str, pattern: str = "*.mp4", trash_dir: str = None, merge: bool = False):
+    # trash_dirのデフォルトは directory の親ディレクトリ + .dup_trash
     pass
 ```
 

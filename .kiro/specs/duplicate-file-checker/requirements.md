@@ -98,3 +98,4 @@
 #### Acceptance Criteria
 1. The duplicate-file-checker はTyperライブラリを使用してCLIを実装する。
 2. When ユーザーが引数を指定したとき、duplicate-file-checker は引数を正しく解析する。
+3. The duplicate-file-checker は枝ファイルを移動する先のディレクトリのデフォルト値を「探索するディレクトリ」と同じ階層の `.dup_trash` にする。
