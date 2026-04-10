@@ -46,7 +46,7 @@ def main(
             hash_value, skipped_by_cache = hasher.calculate_hash(file_path)
             if skipped_by_cache:
                 skipped += 1
-                logger.log_skip(file_path)
+                logger.log_skip(file_path, hash_map[hash_value])
             else:
                 processed += 1
 

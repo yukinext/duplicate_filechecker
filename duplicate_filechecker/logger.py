@@ -40,8 +40,8 @@ class Logger:
     def log_file(self, file_path: str):
         self.logger.info(f"Processing file: {file_path}")
 
-    def log_skip(self, file_path: str):
-        self.logger.info(f"Skipped file (cached): {file_path}")
+    def log_skip(self, skipped_file: str, stem_file: str):
+        self.logger.info(f"Skipped file {skipped_file} (cached, stem: {stem_file})")
 
     def log_move(self, source_path: str, target_path: str):
         self.logger.info(f"Moved duplicate file from {source_path} to {target_path}")

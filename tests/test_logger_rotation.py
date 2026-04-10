@@ -50,17 +50,19 @@ def test_log_skip(tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
 
     logger = Logger("skip_test.log")
-    logger.log_skip("/path/to/skipped.mp4")
+    logger.log_skip("/path/to/skipped.mp4", "/path/to/stem.mp4")
 
     # Check console output
     captured = capsys.readouterr()
     assert "skipped" in captured.out
+    assert "stem" in captured.out
 
     # Check file output
     log_file = tmp_path / "logs" / "skip_test.log"
     assert log_file.exists()
     content = log_file.read_text()
     assert "skipped" in content
+    assert "stem" in content
 
 
 def test_log_move(tmp_path, monkeypatch, capsys):
