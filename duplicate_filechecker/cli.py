@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 import typer
@@ -18,6 +19,8 @@ def main(
     trash_dir: str | None = None,
     merge: bool = False,
 ):
+    start_time = time.time()
+
     if trash_dir is None:
         # Default: append .dup_trash to the source directory path
         trash_dir = str(Path(directory).with_name(Path(directory).name + ".dup_trash"))
@@ -43,6 +46,7 @@ def main(
             hash_value, skipped_by_cache = hasher.calculate_hash(file_path)
             if skipped_by_cache:
                 skipped += 1
+                logger.log_skip(file_path)
             else:
                 processed += 1
 
@@ -68,6 +72,9 @@ def main(
     if merge:
         moved = merger.merge(duplicates, trash_dir, directory, logger)
         logger.logger.info(f"今回移動したファイルの総数: {moved}")
+
+    duration = time.time() - start_time
+    logger.log_duration(duration)
 
     logger.logger.info("処理が完了しました。")
 

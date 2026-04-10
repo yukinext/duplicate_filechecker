@@ -39,3 +39,12 @@ class Logger:
 
     def log_file(self, file_path: str):
         self.logger.info(f"Processing file: {file_path}")
+
+    def log_skip(self, file_path: str):
+        self.logger.info(f"Skipped file (cached): {file_path}")
+
+    def log_move(self, file_path: str):
+        self.logger.info(f"Moved duplicate file: {file_path}")
+
+    def log_duration(self, duration: float):
+        self.logger.info(f"Processing completed in {duration:.2f} seconds")
