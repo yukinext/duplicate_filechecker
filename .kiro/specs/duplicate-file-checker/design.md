@@ -258,11 +258,14 @@ class Database:
 **Responsibilities & Constraints**
 - 幹ファイル残し枝ファイル移動
 - ディレクトリ構造維持
+- 移動先ディレクトリが存在しない場合は作成し、既存の場合はそのまま利用
+- 移動先に同名ファイルが存在する場合は、移動元と移動先のパスをログ出力し、ファイル名に `_${数字}` を付与して重複を回避
 
 **Dependencies**
 - Inbound: CLI — 統合スイッチ (P0)
 - Outbound: FileSystem — 移動 (P0)
 - External: shutil — ファイル操作 (P0)
+- External: logging — 競合ログ出力 (P0)
 
 **Contracts**: Service [x]
 
@@ -300,7 +303,7 @@ class Merger:
 ```python
 @app.command()
 def main(directory: str, pattern: str = "*.mp4", trash_dir: str = None, merge: bool = False):
-    # trash_dirのデフォルトは directory の親ディレクトリ + .dup_trash
+    # trash_dirのデフォルトは探索するディレクトリのパスに .dup_trash を付与したパス
     pass
 ```
 
