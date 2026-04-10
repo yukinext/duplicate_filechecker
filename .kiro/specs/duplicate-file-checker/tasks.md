@@ -109,3 +109,19 @@ Use whichever pattern fits the work breakdown:
   - エラーハンドリングをテスト
   - 全ての要件が満たされていることを確認
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 3.1, 3.2, 4.1, 4.2, 5.1, 5.2, 5.3, 6.1, 6.2, 7.1, 7.2, 7.3_
+
+- [ ] 5. 要件追加への対応
+- [ ] 5.1 (P) Scanner を再起探索に更新
+  - os.walk を使用してディレクトリを再起的に辿る実装に変更
+  - fnmatch を使用してパターンマッチングを実装
+  - 既存テストより再起探索対応を確認
+  - _Requirements: 1.4_
+  - _Boundary: Scanner_
+
+- [ ] 5.2 (P) Logger にログローテーション機能を追加
+  - RotatingFileHandler を使用してデイリーローテーション実装
+  - backupCount=7 で7日分保持
+  - maxBytes=0 でサイズベース回転を無効化
+  - ログローテーション機能が正常に動作することを確認
+  - _Requirements: 6.3, 6.4_
+  - _Boundary: Logger_

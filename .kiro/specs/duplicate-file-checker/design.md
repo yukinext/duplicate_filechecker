@@ -138,11 +138,14 @@ Map each requirement ID (e.g., `2.1`) to the design elements that realize it.
 | Requirement | Summary | Components | Interfaces | Flows |
 |-------------|---------|------------|------------|-------|
 | 1.1 | ファイル探索 | Scanner | CLI | 探索フロー |
+| 1.4 | 再起探索 | Scanner | ファイルシステム | 再起フロー |
 | 2.1 | ハッシュ計算 | Hasher | DB | 計算フロー |
 | 3.1 | DB保存 | Database | SQLite | 保存フロー |
 | 4.1 | レポート | CLI | Console | レポートフロー |
 | 5.1 | 統合 | Merger | FileSystem | 統合フロー |
 | 6.1 | ログ | Logger | logging | ログフロー |
+| 6.3 | ログディレクトリ | Logger | ファイルシステム | ログディレクトリ |
+| 6.4 | ログローテーション | Logger | logging | ローテーション |
 | 7.1 | CLI | CLI | Typer | CLIフロー |
 
 ## Components and Interfaces

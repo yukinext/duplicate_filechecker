@@ -1,4 +1,4 @@
-import glob
+import fnmatch
 import os
 
 
@@ -7,6 +7,10 @@ class Scanner:
         if not os.path.exists(directory):
             raise FileNotFoundError(f"Directory {directory} does not exist")
 
-        path_pattern = os.path.join(directory, pattern)
-        files = glob.glob(path_pattern)
+        files = []
+        # Recursively walk through directory
+        for root, dirs, filenames in os.walk(directory):
+            for filename in filenames:
+                if fnmatch.fnmatch(filename, pattern):
+                    files.append(os.path.join(root, filename))
         return sorted(files)

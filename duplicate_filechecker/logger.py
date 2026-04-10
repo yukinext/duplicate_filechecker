@@ -1,5 +1,6 @@
 import logging
 import sys
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 
@@ -19,8 +20,9 @@ class Logger:
         for handler in self.logger.handlers[:]:
             self.logger.removeHandler(handler)
 
-        # File handler
-        file_handler = logging.FileHandler(log_path)
+        # Rotating file handler for daily rotation with 7-day retention
+        # maxBytes = 0 enables size-based rotation disabled, only daily rotation enabled
+        file_handler = RotatingFileHandler(log_path, maxBytes=0, backupCount=7, encoding="utf-8")
         file_handler.setLevel(logging.INFO)
 
         # Console handler
