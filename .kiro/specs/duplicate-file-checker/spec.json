@@ -1,9 +1,9 @@
 {
   "feature_name": "duplicate-file-checker",
   "created_at": "2026-04-10T00:00:00Z",
-  "updated_at": "2026-04-10T05:00:00Z",
+  "updated_at": "2026-04-10T06:00:00Z",
   "language": "ja",
-  "phase": "design-updated",
+  "phase": "design-generated",
   "approvals": {
     "requirements": {
       "generated": true,
