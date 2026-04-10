@@ -19,9 +19,8 @@ def main(
     merge: bool = False,
 ):
     if trash_dir is None:
-        # Default: same level as directory, .dup_trash
-        parent_dir = Path(directory).parent
-        trash_dir = str(parent_dir / ".dup_trash")
+        # Default: append .dup_trash to the source directory path
+        trash_dir = str(Path(directory).with_name(Path(directory).name + ".dup_trash"))
 
     logger = Logger()
     scanner = Scanner()
@@ -67,7 +66,7 @@ def main(
 
     moved = 0
     if merge:
-        moved = merger.merge(duplicates, trash_dir)
+        moved = merger.merge(duplicates, trash_dir, directory, logger)
         logger.logger.info(f"今回移動したファイルの総数: {moved}")
 
     logger.logger.info("処理が完了しました。")
