@@ -56,8 +56,8 @@ def main(
                 duplicates[hash_value].append(file_path)
             else:
                 hash_map[hash_value] = file_path
-        except Exception as e:
-            logger.logger.error(f"Error processing {file_path}: {e}")
+        except Exception:
+            logger.logger.exception(f"Error processing {file_path}")
             skipped += 1
 
     # Report
