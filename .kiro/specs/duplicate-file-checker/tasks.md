@@ -156,3 +156,10 @@ Use whichever pattern fits the work breakdown:
   - 処理時間が正確に計測されることを確認
   - _Requirements: 6.7_
   - _Boundary: CLI_
+
+- [ ] 6.5 Logger のスキップログに幹ファイルパスを追加
+  - Logger のlog_skipメソッドを更新して、スキップされたファイルと幹ファイルのパスを出力する
+  - CLI でlog_skipを呼び出す際に幹ファイルのパスを渡す
+  - ログ出力が幹ファイルパスを含むことを確認
+  - _Requirements: 6.8_
+  - _Boundary: Logger, CLI_
