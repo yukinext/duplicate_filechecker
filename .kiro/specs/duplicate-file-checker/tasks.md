@@ -48,7 +48,7 @@ Use whichever pattern fits the work breakdown:
   - _Requirements: 1.1, 1.2, 1.3_
   - _Boundary: Scanner_
 
-- [ ] 2.2 (P) Hasher コンポーネントの実装
+- [x] 2.2 (P) Hasher コンポーネントの実装
   - ファイルのハッシュ値を計算する機能を実装
   - DBに保存されているハッシュ値をチェックしてスキップする機能を実装
   - 同一ハッシュ値のファイルを判定する機能を実装
@@ -57,7 +57,7 @@ Use whichever pattern fits the work breakdown:
   - _Requirements: 2.1, 2.2, 2.3_
   - _Boundary: Hasher_
 
-- [ ] 2.3 (P) Database コンポーネントの実装
+- [x] 2.3 (P) Database コンポーネントの実装
   - SQLite DBへの接続とテーブル作成機能を実装
   - ファイルパスとハッシュ値の保存・取得機能を実装
   - DB更新処理を実装
@@ -65,7 +65,7 @@ Use whichever pattern fits the work breakdown:
   - _Requirements: 3.1, 3.2_
   - _Boundary: Database_
 
-- [ ] 2.4 (P) Merger コンポーネントの実装
+- [x] 2.4 (P) Merger コンポーネントの実装
   - 幹ファイルを残し枝ファイルを移動する機能を実装
   - ディレクトリ構造を維持した移動を実装
   - 統合スイッチのデフォルトoffを実装
@@ -73,7 +73,7 @@ Use whichever pattern fits the work breakdown:
   - _Requirements: 5.1, 5.2, 5.3_
   - _Boundary: Merger_
 
-- [ ] 2.5 (P) Logger コンポーネントの実装
+- [x] 2.5 (P) Logger コンポーネントの実装
   - loggingライブラリを使用したログ設定を実装
   - ファイルとコンソールへの出力機能を実装
   - 処理中のファイルパスをログに出力する機能を実装
@@ -82,7 +82,7 @@ Use whichever pattern fits the work breakdown:
   - _Boundary: Logger_
 
 - [ ] 3. CLIインターフェースの実装
-- [ ] 3.1 CLI 引数解析の実装
+- [x] 3.1 CLI 引数解析の実装
   - Typer を使用したコマンドラインインターフェースを実装
   - ディレクトリ、ファイルパターン、trash_dir、mergeスイッチの引数を実装
   - trash_dir のデフォルト値を探索ディレクトリと同じ階層の .dup_trash に設定
@@ -90,20 +90,20 @@ Use whichever pattern fits the work breakdown:
   - _Requirements: 7.1, 7.2, 7.3_
 
 - [ ] 4. 統合とテスト
-- [ ] 4.1 コンポーネント統合
+- [x] 4.1 コンポーネント統合
   - CLI から各コンポーネントを呼び出す統合処理を実装
   - ファイル探索からレポート表示までの全体フローを実装
   - 統合スイッチon時のファイル移動処理を実装
   - 全体処理が正常に動作することを確認
   - _Requirements: 1.1, 2.1, 3.1, 4.1, 4.2, 5.1, 6.1, 7.1_
 
-- [ ] 4.2 統計レポートの実装
+- [x] 4.2 統計レポートの実装
   - 探索したファイル総数、スキップ数、処理数、ユニーク数を計算して表示
   - 統合on時の移動ファイル数を表示
   - レポート表示が正確であることを確認
   - _Requirements: 4.1, 4.2_
 
-- [ ] 4.3 エンドツーエンドテスト
+- [x] 4.3 エンドツーエンドテスト
   - サンプルファイルを使用して全体処理をテスト
   - 重複ファイルの検出と統合を検証
   - エラーハンドリングをテスト
@@ -111,14 +111,14 @@ Use whichever pattern fits the work breakdown:
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 3.1, 3.2, 4.1, 4.2, 5.1, 5.2, 5.3, 6.1, 6.2, 7.1, 7.2, 7.3_
 
 - [ ] 5. 要件追加への対応
-- [ ] 5.1 (P) Scanner を再起探索に更新
+- [x] 5.1 (P) Scanner を再起探索に更新
   - os.walk を使用してディレクトリを再起的に辿る実装に変更
   - fnmatch を使用してパターンマッチングを実装
   - 既存テストより再起探索対応を確認
   - _Requirements: 1.4_
   - _Boundary: Scanner_
 
-- [ ] 5.2 (P) Logger にログローテーション機能を追加
+- [x] 5.2 (P) Logger にログローテーション機能を追加
   - RotatingFileHandler を使用してデイリーローテーション実装
   - backupCount=7 で7日分保持
   - maxBytes=0 でサイズベース回転を無効化

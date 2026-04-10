@@ -55,7 +55,7 @@ def main(
             skipped += 1
 
     # Report
-    unique_files = len(hash_map) + sum(len(files) - 1 for files in duplicates.values())
+    unique_files = len(hash_map)
 
     logger.logger.info(f"探索したファイルの総数: {total_files}")
     logger.logger.info(f"スキップしたファイルの総数: {skipped}")
