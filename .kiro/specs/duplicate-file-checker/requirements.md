@@ -79,18 +79,13 @@
 1. When 処理が完了したとき、duplicate-file-checker は探索したファイルの総数、スキップしたファイルの総数、今回処理したファイルの総数、ユニークなファイルの総数を表示する。
 2. If 統合スイッチがonの場合、duplicate-file-checker は移動したファイルの総数を表示する。
 
-### Requirement 5: ファイル統合機能
-**Objective:** オプションで重複ファイルを統合する。
+### Requirement 5: エラーハンドリング機能
+**Objective:** 処理中の例外を適切に処理し、ログに出力する。
 
 #### Acceptance Criteria
-1. Where 統合スイッチがonの場合、duplicate-file-checker は幹ファイルを残し、枝ファイルを指定ディレクトリに移動する。
-2. While 統合処理中、duplicate-file-checker はディレクトリ構造を維持する。
-3. The duplicate-file-checker はデフォルトで統合スイッチをoffにする。
-4. When 移動先ディレクトリが存在しない場合、duplicate-file-checker は新規に作成し、既に存在する場合はそのまま利用する。
-5. If 移動先に同じファイルが存在する場合、duplicate-file-checker は移動元ファイルのパスと移動先ファイルのパスをログに出力する。
-6. When 移動先に同じファイルが存在する場合、duplicate-file-checker は移動するファイル名に `_${数字}` を付与し、既存ファイル名と重複しないように1から順番にカウントアップする。
+1. When ファイル処理中に例外が発生した場合、duplicate-file-checker は例外の内容をログとコンソールに出力する。
 
-### Requirement 6: ログ出力機能
+### Requirement 6: ファイル統合機能
 **Objective:** 処理中のログをファイルとコンソールに出力する。
 
 #### Acceptance Criteria
