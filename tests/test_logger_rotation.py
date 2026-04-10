@@ -67,7 +67,7 @@ def test_log_move(tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
 
     logger = Logger("move_test.log")
-    logger.log_move("/path/to/moved.mp4")
+    logger.log_move("/path/to/source.mp4", "/path/to/target.mp4")
 
     # Check console output
     captured = capsys.readouterr()
