@@ -31,7 +31,7 @@ class Merger:
                         target_path = self._get_unique_target_path(target_path)
 
                     shutil.move(branch_path, target_path)
-                    logger.log_move(branch_path, target_path)
+                    logger.log_move(branch_path, target_path, stem)
                     moved_count += 1
 
         return moved_count

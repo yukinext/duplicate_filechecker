@@ -55,4 +55,5 @@ def test_merger_renames_conflicting_file(tmp_path, monkeypatch, capsys):
     assert (existing_target_dir / "john_1.mp4").exists()
     assert not branch.exists()
     captured = capsys.readouterr()
-    assert "Destination conflict" in captured.out
+    assert "stem" in captured.out
+    assert "john.mp4" in captured.out

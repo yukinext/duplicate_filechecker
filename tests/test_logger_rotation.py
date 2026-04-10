@@ -69,17 +69,19 @@ def test_log_move(tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
 
     logger = Logger("move_test.log")
-    logger.log_move("/path/to/source.mp4", "/path/to/target.mp4")
+    logger.log_move("/path/to/source.mp4", "/path/to/target.mp4", "/path/to/stem.mp4")
 
     # Check console output
     captured = capsys.readouterr()
     assert "moved" in captured.out
+    assert "stem" in captured.out
 
     # Check file output
     log_file = tmp_path / "logs" / "move_test.log"
     assert log_file.exists()
     content = log_file.read_text()
     assert "moved" in content
+    assert "stem" in content
 
 
 def test_log_duration(tmp_path, monkeypatch, capsys):
